@@ -13,15 +13,6 @@ type timeUnit int64
 //export __wasm_call_ctors
 func __wasm_call_ctors()
 
-//export _start
-func _start() {
-	// These need to be initialized early so that the heap can be initialized.
-	heapStart = uintptr(unsafe.Pointer(&heapStartSymbol))
-	heapEnd = uintptr(wasm_memory_size(0) * wasmPageSize)
-	run()
-	__stdio_exit()
-}
-
 // Read the command line arguments from WASI.
 // For example, they can be passed to a program with wasmtime like this:
 //
@@ -89,7 +80,7 @@ var (
 	sleepTicksNEvents uint32
 )
 
-func sleepTicks(d timeUnit) {
+func wasiSleepTicks(d timeUnit) {
 	sleepTicksSubscription.u.u.timeout = uint64(d)
 	poll_oneoff(&sleepTicksSubscription, &sleepTicksResult, 1, &sleepTicksNEvents)
 }

@@ -2,6 +2,9 @@
 
 package runtime
 
+// TODO: this is essentially reactor mode wasm. So we might want to support
+// -buildmode=c-shared (and default to it).
+
 import "unsafe"
 
 type timeUnit int64

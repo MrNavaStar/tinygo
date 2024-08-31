@@ -33,6 +33,14 @@ func (c *Config) CPU() string {
 	return c.Target.CPU
 }
 
+// The current build mode (like the `-buildmode` command line flag).
+func (c *Config) BuildMode() string {
+	if c.Options.BuildMode != "" {
+		return c.Options.BuildMode
+	}
+	return "default"
+}
+
 // Features returns a list of features this CPU supports. For example, for a
 // RISC-V processor, that could be "+a,+c,+m". For many targets, an empty list
 // will be returned.
@@ -90,6 +98,12 @@ func (c *Config) BuildTags() []string {
 		"serial." + c.Serial()}...) // used inside the machine package
 	for i := 1; i <= c.GoMinorVersion; i++ {
 		tags = append(tags, fmt.Sprintf("go1.%d", i))
+	}
+	if c.BuildMode() == "c-shared" && strings.HasPrefix(c.Triple(), "wasm") {
+		// Use reactor mode, which means the application is initialized in
+		// _initialize and main.main is not called by default. See for example:
+		// https://github.com/WebAssembly/WASI/blob/main/legacy/application-abi.md
+		tags = append(tags, "tinygo_wasm_reactor")
 	}
 	tags = append(tags, c.Options.Tags...)
 	return tags

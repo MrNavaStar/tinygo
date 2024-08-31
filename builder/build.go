@@ -197,6 +197,7 @@ func Build(pkgName, outpath, tmpdir string, config *compileopts.Config) (BuildRe
 		ABI:             config.ABI(),
 		GOOS:            config.GOOS(),
 		GOARCH:          config.GOARCH(),
+		BuildMode:       config.BuildMode(),
 		CodeModel:       config.CodeModel(),
 		RelocationModel: config.RelocationModel(),
 		SizeLevel:       sizeLevel,
@@ -648,6 +649,13 @@ func Build(pkgName, outpath, tmpdir string, config *compileopts.Config) (BuildRe
 	}
 	result.Binary = result.Executable // final file
 	ldflags := append(config.LDFlags(), "-o", result.Executable)
+
+	if config.Options.BuildMode == "c-shared" {
+		if config.GOOS() != "wasip1" {
+			return result, fmt.Errorf("buildmode c-shared is only supported on wasip1 at the moment")
+		}
+		ldflags = append(ldflags, "--no-entry")
+	}
 
 	// Add compiler-rt dependency if needed. Usually this is a simple load from
 	// a cache.
